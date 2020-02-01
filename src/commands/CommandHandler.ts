@@ -17,6 +17,7 @@ limitations under the License.
 import { Mjolnir } from "../Mjolnir";
 import { execStatusCommand } from "./StatusCommand";
 import { execBanCommand, execUnbanCommand } from "./UnbanBanCommand";
+import { execKickCommand, execUnkickCommand } from "./KickUnkickCommand";
 import { execDumpRulesCommand } from "./DumpRulesCommand";
 import { LogService, RichReply } from "matrix-bot-sdk";
 import * as htmlEscape from "escape-html";
@@ -45,6 +46,10 @@ export async function handleCommand(roomId: string, event: any, mjolnir: Mjolnir
             return await execBanCommand(roomId, event, mjolnir, parts);
         } else if (parts[1] === 'unban' && parts.length > 2) {
             return await execUnbanCommand(roomId, event, mjolnir, parts);
+        } else if (parts[1] === 'kick' && parts.length > 2) {
+            return await execKickCommand(roomId, event, mjolnir, parts);
+        } else if (parts[1] === 'unkick' && parts.length > 2) {
+            return await execUnkickCommand(roomId, event, mjolnir, parts);
         } else if (parts[1] === 'rules') {
             return await execDumpRulesCommand(roomId, event, mjolnir);
         } else if (parts[1] === 'sync') {
