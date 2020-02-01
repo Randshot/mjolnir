@@ -26,6 +26,7 @@ import { execPermissionCheckCommand } from "./PermissionCheckCommand";
 import { execCreateListCommand } from "./CreateBanListCommand";
 import { execUnwatchCommand, execWatchCommand } from "./WatchUnwatchCommand";
 import { execRedactCommand } from "./RedactCommand";
+import { execSayCommand } from "./SayCommand";
 import { execImportCommand } from "./ImportCommand";
 import { execSetDefaultListCommand } from "./SetDefaultBanListCommand";
 import { execDeactivateCommand } from "./DeactivateCommand";
@@ -64,6 +65,8 @@ export async function handleCommand(roomId: string, event: any, mjolnir: Mjolnir
             return await execUnwatchCommand(roomId, event, mjolnir, parts);
         } else if (parts[1] === 'redact' && parts.length > 1) {
             return await execRedactCommand(roomId, event, mjolnir, parts);
+        } else if (parts[1] === 'say' && parts.length > 2) {
+            return await execSayCommand(roomId, event, mjolnir, parts);
         } else if (parts[1] === 'import' && parts.length > 2) {
             return await execImportCommand(roomId, event, mjolnir, parts);
         } else if (parts[1] === 'default' && parts.length > 2) {
