@@ -86,25 +86,27 @@ export async function applyUserBans(lists: BanList[], roomIds: string[], mjolnir
                                 banned = true;
                                 break;
                             } else if (userRule.recommendation === RECOMMENDATION_KICK) {
-                                // User needs to be kicked
+                                if (member.membership !== 'leave') {
+                                    // User needs to be kicked
 
-                                // We specifically use sendNotice to avoid having to escape HTML
-                                await logMessage(LogLevel.DEBUG, "ApplyBan", `Kicking ${member.userId} in ${roomId} for: ${userRule.reason}`);
+                                    // We specifically use sendNotice to avoid having to escape HTML
+                                    await logMessage(LogLevel.DEBUG, "ApplyBan", `Kicking ${member.userId} in ${roomId} for: ${userRule.reason}`);
 
-                                if (!config.noop) {
-                                    // Always prioritize redactions above kicks
-                                    if (mjolnir.automaticRedactGlobs.find(g => g.test(userRule.reason.toLowerCase()))) {
-                                        await redactUserMessagesIn(mjolnir.client, member.userId, [roomId]);
+                                    if (!config.noop) {
+                                        // Always prioritize redactions above kicks
+                                        if (mjolnir.automaticRedactGlobs.find(g => g.test(userRule.reason.toLowerCase()))) {
+                                            await redactUserMessagesIn(mjolnir.client, member.userId, [roomId]);
+                                        }
+
+                                        await mjolnir.client.kickUser(member.userId, roomId, userRule.reason);
+                                    } else {
+                                        await logMessage(LogLevel.WARN, "ApplyBan", `Tried to kick ${member.userId} in ${roomId} but Mjolnir is running in no-op mode`);
                                     }
 
-                                    await mjolnir.client.kickUser(member.userId, roomId, userRule.reason);
-                                } else {
-                                    await logMessage(LogLevel.WARN, "ApplyBan", `Tried to kick ${member.userId} in ${roomId} but Mjolnir is running in no-op mode`);
+                                    kicksApplied++;
+                                    kicked = true;
+                                    break;
                                 }
-
-                                kicksApplied++;
-                                kicked = true;
-                                break;
                             } else {
                                 await logMessage(LogLevel.WARN, "ApplyBan", `Unknown recommended action for user rule '${userRule.entity}': ${userRule.action}`);
                             }
