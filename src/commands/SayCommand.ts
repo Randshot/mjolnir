@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-import { Mjolnir, STATE_CHECKING_PERMISSIONS, STATE_NOT_STARTED, STATE_RUNNING, STATE_SYNCING } from "../Mjolnir";
+import { Mjolnir } from "../Mjolnir";
 import { RichReply } from "matrix-bot-sdk";
 
 // !mjolnir say <room alias/ID> <message>
@@ -44,5 +44,8 @@ export async function execSayCommand(roomId: string, event: any, mjolnir: Mjolni
     }
 
     await mjolnir.client.unstableApis.addReactionToEvent(roomId, event['event_id'], '✅');
-    return mjolnir.client.sendMessage(targetRoomId, sayMessage);
+    return mjolnir.client.sendMessage(targetRoomId, {
+        msgtype: "m.text",
+        body: sayMessage
+    });
 }
