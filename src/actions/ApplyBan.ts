@@ -112,7 +112,7 @@ export async function applyUserBans(lists: BanList[], roomIds: string[], mjolnir
                             }
                         }
                     }
-                    if (banned) break;
+                    if (banned || kicked) break;
                 }
             }
         } catch (e) {
