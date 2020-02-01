@@ -118,7 +118,7 @@ export async function execBanCommand(roomId: string, event: any, mjolnir: Mjolni
     const stateKey = `rule:${bits.entity}`;
 
     await mjolnir.client.sendStateEvent(bits.list.roomId, bits.ruleType, stateKey, ruleContent);
-    await mjolnir.client.unstableApis.addReactionToEvent(roomId, event['event_id'], '✅');
+    await mjolnir.client.unstableApis.addReactionToEvent(roomId, event['event_id'], '?');
 }
 
 // !mjolnir unban <shortcode> <user|server|room> <glob> [apply:t/f]
@@ -161,5 +161,5 @@ export async function execUnbanCommand(roomId: string, event: any, mjolnir: Mjol
         }
     }
 
-    await mjolnir.client.unstableApis.addReactionToEvent(roomId, event['event_id'], '✅');
+    await mjolnir.client.unstableApis.addReactionToEvent(roomId, event['event_id'], '?');
 }

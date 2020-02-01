@@ -101,7 +101,7 @@ export async function execKickCommand(roomId: string, event: any, mjolnir: Mjoln
     const stateKey = `rule:${bits.entity}`;
 
     await mjolnir.client.sendStateEvent(bits.list.roomId, RULE_USER, stateKey, ruleContent);
-    await mjolnir.client.unstableApis.addReactionToEvent(roomId, event['event_id'], 'âœ…');
+    await mjolnir.client.unstableApis.addReactionToEvent(roomId, event['event_id'], '✅');
 }
 
 // !mjolnir unkick <shortcode> <glob>
@@ -113,5 +113,5 @@ export async function execUnkickCommand(roomId: string, event: any, mjolnir: Mjo
     const stateKey = `rule:${bits.entity}`;
 
     await mjolnir.client.sendStateEvent(bits.list.roomId, RULE_USER, stateKey, ruleContent);
-    await mjolnir.client.unstableApis.addReactionToEvent(roomId, event['event_id'], 'âœ…');
+    await mjolnir.client.unstableApis.addReactionToEvent(roomId, event['event_id'], '✅');
 }
