@@ -15,6 +15,7 @@ limitations under the License.
 */
 
 import BanList from "../models/BanList";
+import { RECOMMENDATION_BAN, RECOMMENDATION_KICK } from "../models/ListRule";
 import { RoomUpdateError } from "../models/RoomUpdateError";
 import { Mjolnir } from "../Mjolnir";
 import config from "../config";
@@ -34,6 +35,7 @@ export async function applyUserBans(lists: BanList[], roomIds: string[], mjolnir
     // We can only ban people who are not already banned, and who match the rules.
     const errors: RoomUpdateError[] = [];
     let bansApplied = 0;
+    let kicksApplied = 0;
     for (const roomId of roomIds) {
         try {
             // We specifically use sendNotice to avoid having to escape HTML
@@ -49,38 +51,63 @@ export async function applyUserBans(lists: BanList[], roomIds: string[], mjolnir
             } else {
                 const state = await mjolnir.client.getRoomState(roomId);
                 members = state.filter(s => s['type'] === 'm.room.member' && !!s['state_key']).map(s => {
-                    return {userId: s['state_key'], membership: s['content'] ? s['content']['membership'] : 'leave'};
+                    return {userId: s['state_key'], membership: s['content'] ? s['content']['membership'] : 'join'};
                 });
             }
 
             for (const member of members) {
-                if (member.membership === 'ban') {
+                if (member.membership === 'ban' || (config.ignoreLeftUsers && member.membership === 'leave')) {
                     continue; // user already banned
                 }
 
                 let banned = false;
+                let kicked = false;
                 for (const list of lists) {
                     for (const userRule of list.userRules) {
                         if (userRule.isMatch(member.userId)) {
-                            // User needs to be banned
+                            if (userRule.recommendation === RECOMMENDATION_BAN) {
+                                // User needs to be banned
 
-                            // We specifically use sendNotice to avoid having to escape HTML
-                            await logMessage(LogLevel.DEBUG, "ApplyBan", `Banning ${member.userId} in ${roomId} for: ${userRule.reason}`);
+                                // We specifically use sendNotice to avoid having to escape HTML
+                                await logMessage(LogLevel.DEBUG, "ApplyBan", `Banning ${member.userId} in ${roomId} for: ${userRule.reason}`);
 
-                            if (!config.noop) {
-                                // Always prioritize redactions above bans
-                                if (mjolnir.automaticRedactGlobs.find(g => g.test(userRule.reason.toLowerCase()))) {
-                                    await redactUserMessagesIn(mjolnir.client, member.userId, [roomId]);
+                                if (!config.noop) {
+                                    // Always prioritize redactions above bans
+                                    if (mjolnir.automaticRedactGlobs.find(g => g.test(userRule.reason.toLowerCase()))) {
+                                        await redactUserMessagesIn(mjolnir.client, member.userId, [roomId]);
+                                    }
+
+                                    await mjolnir.client.banUser(member.userId, roomId, userRule.reason);
+                                } else {
+                                    await logMessage(LogLevel.WARN, "ApplyBan", `Tried to ban ${member.userId} in ${roomId} but Mjolnir is running in no-op mode`);
                                 }
 
-                                await mjolnir.client.banUser(member.userId, roomId, userRule.reason);
-                            } else {
-                                await logMessage(LogLevel.WARN, "ApplyBan", `Tried to ban ${member.userId} in ${roomId} but Mjolnir is running in no-op mode`);
-                            }
+                                bansApplied++;
+                                banned = true;
+                                break;
+                            } else if (userRule.recommendation === RECOMMENDATION_KICK) {
+                                // User needs to be kicked
 
-                            bansApplied++;
-                            banned = true;
-                            break;
+                                // We specifically use sendNotice to avoid having to escape HTML
+                                await logMessage(LogLevel.DEBUG, "ApplyBan", `Kicking ${member.userId} in ${roomId} for: ${userRule.reason}`);
+
+                                if (!config.noop) {
+                                    // Always prioritize redactions above kicks
+                                    if (mjolnir.automaticRedactGlobs.find(g => g.test(userRule.reason.toLowerCase()))) {
+                                        await redactUserMessagesIn(mjolnir.client, member.userId, [roomId]);
+                                    }
+
+                                    await mjolnir.client.kickUser(member.userId, roomId, userRule.reason);
+                                } else {
+                                    await logMessage(LogLevel.WARN, "ApplyBan", `Tried to kick ${member.userId} in ${roomId} but Mjolnir is running in no-op mode`);
+                                }
+
+                                kicksApplied++;
+                                kicked = true;
+                                break;
+                            } else {
+                                await logMessage(LogLevel.WARN, "ApplyBan", `Unknown recommended action for user rule '${userRule.entity}': ${userRule.action}`);
+                            }
                         }
                     }
                     if (banned) break;
@@ -91,7 +118,7 @@ export async function applyUserBans(lists: BanList[], roomIds: string[], mjolnir
             errors.push({
                 roomId,
                 errorMessage: message,
-                errorKind: message.includes("You don't have permission to ban") ? ERROR_KIND_PERMISSION : ERROR_KIND_FATAL,
+                errorKind: message.includes("You don't have permission to ban/kick") ? ERROR_KIND_PERMISSION : ERROR_KIND_FATAL,
             });
         }
     }
@@ -99,6 +126,17 @@ export async function applyUserBans(lists: BanList[], roomIds: string[], mjolnir
     if (bansApplied > 0) {
         const html = `<font color="#00cc00"><b>Banned ${bansApplied} people</b></font>`;
         const text = `Banned ${bansApplied} people`;
+        await mjolnir.client.sendMessage(config.managementRoom, {
+            msgtype: "m.notice",
+            body: text,
+            format: "org.matrix.custom.html",
+            formatted_body: html,
+        });
+    }
+
+    if (kicksApplied > 0) {
+        const html = `<font color="#00cc00"><b>Kicked ${bansApplied} people</b></font>`;
+        const text = `Kicked ${bansApplied} people`;
         await mjolnir.client.sendMessage(config.managementRoom, {
             msgtype: "m.notice",
             body: text,

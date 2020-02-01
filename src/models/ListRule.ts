@@ -17,10 +17,13 @@ limitations under the License.
 import { MatrixGlob } from "matrix-bot-sdk";
 
 export const RECOMMENDATION_BAN = "m.ban";
+export const RECOMMENDATION_KICK = "m.kick";
 export const RECOMMENDATION_BAN_TYPES = [RECOMMENDATION_BAN, "org.matrix.mjolnir.ban"];
+export const RECOMMENDATION_KICK_TYPES = [RECOMMENDATION_KICK, "org.matrix.mjolnir.kick"];
 
 export function recommendationToStable(recommendation: string, unstable = true): string {
     if (RECOMMENDATION_BAN_TYPES.includes(recommendation)) return unstable ? RECOMMENDATION_BAN_TYPES[RECOMMENDATION_BAN_TYPES.length - 1] : RECOMMENDATION_BAN;
+    if (RECOMMENDATION_KICK_TYPES.includes(recommendation)) return unstable ? RECOMMENDATION_KICK_TYPES[RECOMMENDATION_KICK_TYPES.length - 1] : RECOMMENDATION_KICK;
     return null;
 }
 
@@ -28,12 +31,13 @@ export class ListRule {
 
     private glob: MatrixGlob;
 
-    constructor(public readonly entity: string, private action: string, public readonly reason: string, public readonly kind: string) {
+    constructor(public readonly entity: string, public readonly action: string, public readonly reason: string, public readonly kind: string) {
         this.glob = new MatrixGlob(entity);
     }
 
     public get recommendation(): string {
         if (RECOMMENDATION_BAN_TYPES.includes(this.action)) return RECOMMENDATION_BAN;
+        if (RECOMMENDATION_KICK_TYPES.includes(this.action)) return RECOMMENDATION_KICK;
     }
 
     public isMatch(entity: string): boolean {

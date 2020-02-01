@@ -36,6 +36,7 @@ interface IConfig {
     noop: boolean;
     protectedRooms: string[]; // matrix.to urls
     fasterMembershipChecks: boolean;
+    ignoreLeftUsers: boolean;
     automaticallyRedactForReasons: string[]; // case-insensitive globs
     protectAllJoinedRooms: boolean;
     banListServer: {

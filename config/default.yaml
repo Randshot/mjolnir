@@ -63,6 +63,11 @@ noop: false
 # server struggles with /state requests then set this to true.
 fasterMembershipChecks: false
 
+# Set to true to ignore users that have already left the room when applying bans.
+# While setting fasterMembershipChecks to true essentially has the same
+# effect, this option also includes users that have been invited.
+ignoreLeftUsers: false
+
 # A case-insensitive list of ban reasons to automatically redact a user's
 # messages for. Typically this is useful to avoid having to type two commands
 # to the bot. Use asterisks to represent globs (ie: "spam*testing" would match
@@ -70,6 +75,7 @@ fasterMembershipChecks: false
 automaticallyRedactForReasons:
   - "spam"
   - "advertising"
+  - "bot"
 
 # A list of rooms to protect (matrix.to URLs)
 protectedRooms:
