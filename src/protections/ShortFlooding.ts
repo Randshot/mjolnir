@@ -41,10 +41,7 @@ export class ShortFlooding implements IProtection {
 
         // Ignore events sent by users in the management room
         const managers = await mjolnir.client.getJoinedRoomMembers(config.managementRoom);
-        if (managers.includes(event['sender'])) {
-            await logMessage(LogLevel.DEBUG, "ShortFlooding", `Ignoring event by ${event['sender']} in ${roomId}`);
-            return;
-        }
+        if (managers.includes(event['sender'])) return;
 
         const forRoom = this.lastEvents[roomId];
         if (!forRoom[event['sender']]) forRoom[event['sender']] = [];
