@@ -92,6 +92,7 @@ export async function handleCommand(roomId: string, event: any, mjolnir: Mjolnir
                 "!mjolnir kick <list shortcode> <glob> [reason]                      - Adds an entity to the ban list (with a recommended action of kicking)\n" +
                 "!mjolnir unkick <list shortcode> <glob>                             - Removes an entity from the ban list. Note that this can also be used to remove user ban rules\n" +
                 "!mjolnir redact <user ID> [room alias/ID]                           - Redacts messages by the sender in the target room (or all rooms)\n" +
+                "!mjolnir say <room alias/ID> <message>                              - Sends the provided message in the target room\n" +
                 "!mjolnir rules                                                      - Lists the rules currently in use by Mjolnir\n" +
                 "!mjolnir sync                                                       - Force updates of all lists and re-apply rules\n" +
                 "!mjolnir verify                                                     - Ensures Mjolnir can moderate all your rooms\n" +
