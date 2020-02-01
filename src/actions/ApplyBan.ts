@@ -137,8 +137,8 @@ export async function applyUserBans(lists: BanList[], roomIds: string[], mjolnir
     }
 
     if (kicksApplied > 0) {
-        const html = `<font color="#00cc00"><b>Kicked ${bansApplied} people</b></font>`;
-        const text = `Kicked ${bansApplied} people`;
+        const html = `<font color="#00cc00"><b>Kicked ${kicksApplied} people</b></font>`;
+        const text = `Kicked ${kicksApplied} people`;
         await mjolnir.client.sendMessage(config.managementRoom, {
             msgtype: "m.notice",
             body: text,
