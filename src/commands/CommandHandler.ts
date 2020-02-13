@@ -17,6 +17,7 @@ limitations under the License.
 import { Mjolnir } from "../Mjolnir";
 import { execStatusCommand } from "./StatusCommand";
 import { execBanCommand, execUnbanCommand } from "./UnbanBanCommand";
+import { execKickonceCommand } from "./KickonceCommand";
 import { execKickCommand, execUnkickCommand } from "./KickUnkickCommand";
 import { execDumpRulesCommand } from "./DumpRulesCommand";
 import { LogService, RichReply } from "matrix-bot-sdk";
@@ -47,6 +48,8 @@ export async function handleCommand(roomId: string, event: any, mjolnir: Mjolnir
             return await execBanCommand(roomId, event, mjolnir, parts);
         } else if (parts[1] === 'unban' && parts.length > 2) {
             return await execUnbanCommand(roomId, event, mjolnir, parts);
+        } else if (parts[1] === 'kickonce' && parts.length > 2) {
+            return await execKickonceCommand(roomId, event, mjolnir, parts);
         } else if (parts[1] === 'kick' && parts.length > 2) {
             return await execKickCommand(roomId, event, mjolnir, parts);
         } else if (parts[1] === 'unkick' && parts.length > 2) {
@@ -92,6 +95,7 @@ export async function handleCommand(roomId: string, event: any, mjolnir: Mjolnir
                 "!mjolnir status                                                     - Print status information\n" +
                 "!mjolnir ban <list shortcode> <user|room|server> <glob> [reason]    - Adds an entity to the ban list\n" +
                 "!mjolnir unban <list shortcode> <user|room|server> <glob> [apply]   - Removes an entity from the ban list. If apply is 'true', the users matching the glob will actually be unbanned\n" +
+                "!mjolnir kickonce <glob> [reason]                                   - Kicks users matching the given glob in all protected rooms without adding a rule to the ban/kick list\n" +
                 "!mjolnir kick <list shortcode> <glob> [reason]                      - Adds an entity to the ban list (with a recommended action of kicking)\n" +
                 "!mjolnir unkick <list shortcode> <glob>                             - Removes an entity from the ban list. Note that this can also be used to remove user ban rules\n" +
                 "!mjolnir redact <user ID> [room alias/ID]                           - Redacts messages by the sender in the target room (or all rooms)\n" +
