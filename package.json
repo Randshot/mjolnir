@@ -1,6 +1,6 @@
 {
   "name": "mjolnir",
-  "version": "0.1.11",
+  "version": "0.1.12",
   "description": "A moderation tool for Matrix",
   "main": "lib/index.js",
   "repository": "git@github.com:matrix-org/mjolnir.git",
@@ -27,6 +27,6 @@
     "config": "^3.2.2",
     "escape-html": "^1.0.3",
     "js-yaml": "^3.13.1",
-    "matrix-bot-sdk": "^0.4.1"
+    "matrix-bot-sdk": "^0.5.0-beta.2"
   }
 }

@@ -34,6 +34,10 @@ import { execDeactivateCommand } from "./DeactivateCommand";
 import { execDisableProtection, execEnableProtection, execListProtections } from "./ProtectionsCommands";
 import { execListProtectedRooms } from "./ListProtectedRoomsCommand";
 import { execAddProtectedRoom, execRemoveProtectedRoom } from "./AddRemoveProtectedRoomsCommand";
+import { execAddRoomToDirectoryCommand, execRemoveRoomFromDirectoryCommand } from "./AddRemoveRoomFromDirectoryCommand";
+import { execSetPowerLevelCommand } from "./SetPowerLevelCommand";
+import { execShutdownRoomCommand } from "./ShutdownRoomCommand";
+import { execAddAliasCommand, execMoveAliasCommand, execRemoveAliasCommand, execResolveCommand } from "./AliasCommands";
 
 export const COMMAND_PREFIX = "!mjolnir";
 
@@ -88,6 +92,22 @@ export async function handleCommand(roomId: string, event: any, mjolnir: Mjolnir
             return await execRemoveProtectedRoom(roomId, event, mjolnir, parts);
         } else if (parts[1] === 'rooms' && parts.length === 2) {
             return await execListProtectedRooms(roomId, event, mjolnir);
+        } else if (parts[1] === 'move' && parts.length > 3) {
+            return await execMoveAliasCommand(roomId, event, mjolnir, parts);
+        } else if (parts[1] === 'directory' && parts.length > 3 && parts[2] === 'add') {
+            return await execAddRoomToDirectoryCommand(roomId, event, mjolnir, parts);
+        } else if (parts[1] === 'directory' && parts.length > 3 && parts[2] === 'remove') {
+            return await execRemoveRoomFromDirectoryCommand(roomId, event, mjolnir, parts);
+        } else if (parts[1] === 'alias' && parts.length > 4 && parts[2] === 'add') {
+            return await execAddAliasCommand(roomId, event, mjolnir, parts);
+        } else if (parts[1] === 'alias' && parts.length > 3 && parts[2] === 'remove') {
+            return await execRemoveAliasCommand(roomId, event, mjolnir, parts);
+        } else if (parts[1] === 'resolve' && parts.length > 2) {
+            return await execResolveCommand(roomId, event, mjolnir, parts);
+        } else if (parts[1] === 'powerlevel' && parts.length > 3) {
+            return await execSetPowerLevelCommand(roomId, event, mjolnir, parts);
+        } else if (parts[1] === 'shutdown' && parts[2] === 'room' && parts.length > 3) {
+            return await execShutdownRoomCommand(roomId, event, mjolnir, parts);
         } else {
             // Help menu
             const menu = "" +
@@ -99,6 +119,7 @@ export async function handleCommand(roomId: string, event: any, mjolnir: Mjolnir
                 "!mjolnir kick <list shortcode> <glob> [reason]                      - Adds an entity to the ban list (with a recommended action of kicking)\n" +
                 "!mjolnir unkick <list shortcode> <glob>                             - Removes an entity from the ban list. Note that this can also be used to remove user ban rules\n" +
                 "!mjolnir redact <user ID> [room alias/ID]                           - Redacts messages by the sender in the target room (or all rooms)\n" +
+                "!mjolnir redact <event permalink>                                   - Redacts a message by permalink\n" +
                 "!mjolnir say <room alias/ID> <message>                              - Sends the provided message in the target room\n" +
                 "!mjolnir rules                                                      - Lists the rules currently in use by Mjolnir\n" +
                 "!mjolnir sync                                                       - Force updates of all lists and re-apply rules\n" +
@@ -115,6 +136,14 @@ export async function handleCommand(roomId: string, event: any, mjolnir: Mjolnir
                 "!mjolnir rooms                                                      - Lists all the protected rooms\n" +
                 "!mjolnir rooms add <room alias/ID>                                  - Adds a protected room (may cause high server load)\n" +
                 "!mjolnir rooms remove <room alias/ID>                               - Removes a protected room\n" +
+                "!mjolnir move <room alias> <room alias/ID>                          - Moves a <room alias> to a new <room ID>\n" +
+                "!mjolnir directory add <room alias/ID>                              - Publishes a room in the server's room directory\n" +
+                "!mjolnir directory remove <room alias/ID>                           - Removes a room from the server's room directory\n" +
+                "!mjolnir alias add <room alias> <target room alias/ID>              - Adds <room alias> to <target room>\n" +
+                "!mjolnir alias remove <room alias>                                  - Deletes the room alias from whatever room it is attached to\n" +
+                "!mjolnir resolve <room alias>                                       - Resolves a room alias to a room ID\n" +
+                "!mjolnir shutdown room <room alias/ID>                              - Uses the bot's account to shut down a room, preventing access to the room on this server\n" +
+                "!mjolnir powerlevel <user ID> <power level> [room alias/ID]         - Sets the power level of the user in the specified room (or all protected rooms)\n" +
                 "!mjolnir help                                                       - This menu\n";
             const html = `<b>Mjolnir help:</b><br><pre><code>${htmlEscape(menu)}</code></pre>`;
             const text = `Mjolnir help:\n${menu}`;
