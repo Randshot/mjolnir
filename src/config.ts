@@ -77,6 +77,7 @@ const defaultConfig: IConfig = {
     noop: false,
     protectedRooms: [],
     fasterMembershipChecks: false,
+    ignoreLeftUsers: false,
     automaticallyRedactForReasons: ["spam", "advertising"],
     protectAllJoinedRooms: false,
     banListServer: {
