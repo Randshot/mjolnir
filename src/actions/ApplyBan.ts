@@ -90,7 +90,7 @@ export async function applyUserBans(lists: BanList[], roomIds: string[], mjolnir
                                     // User needs to be kicked
 
                                     // We specifically use sendNotice to avoid having to escape HTML
-                                    await logMessage(LogLevel.DEBUG, "ApplyBan", `Kicking ${member.userId} in ${roomId} for: ${userRule.reason}`);
+                                    await logMessage(LogLevel.INFO, "ApplyBan", `Kicking ${member.userId} in ${roomId} for: ${userRule.reason}`);
 
                                     if (!config.noop) {
                                         // Always prioritize redactions above kicks
