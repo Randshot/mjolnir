@@ -16,7 +16,6 @@ limitations under the License.
 
 import * as path from "path";
 import {
-    AutojoinRoomsMixin,
     LogLevel,
     LogService,
     MatrixClient,
@@ -30,7 +29,8 @@ import BanList from "./models/BanList";
 import { Mjolnir } from "./Mjolnir";
 import { logMessage } from "./LogProxy";
 import { MembershipEvent } from "matrix-bot-sdk/lib/models/events/MembershipEvent";
-import {BanListServer} from "./server/BanListServer";
+import { BanListServer } from "./server/BanListServer";
+import * as htmlEscape from "escape-html";
 
 config.RUNTIME = {client: null};
 
@@ -52,18 +52,34 @@ LogService.info("index", "Starting bot...");
 
     config.RUNTIME.client = client;
 
-    if (config.autojoin) {
-        if (config.autojoinOnlyIfManager) {
-            client.on("room.invite", async (roomId: string, inviteEvent: any) => {
-                const membershipEvent = new MembershipEvent(inviteEvent);
-                const managers = await client.getJoinedRoomMembers(config.managementRoom);
-                if (!managers.includes(membershipEvent.sender)) return; // ignore invite
-                return client.joinRoom(roomId);
+    client.on("room.invite", async (roomId: string, inviteEvent: any) => {
+        const membershipEvent = new MembershipEvent(inviteEvent);
+
+        const reportInvite = async () => {
+            if (!config.recordIgnoredInvites) return; // Nothing to do
+
+            await client.sendMessage(config.managementRoom, {
+                msgtype: "m.text",
+                body: `${membershipEvent.sender} has invited me to ${roomId} but the config prevents me from accepting the invitation. `
+                    + `If you would like this room protected, use "!mjolnir rooms add ${roomId}" so I can accept the invite.`,
+                format: "org.matrix.custom.html",
+                formatted_body: `${htmlEscape(membershipEvent.sender)} has invited me to ${htmlEscape(roomId)} but the config prevents me from `
+                    + `accepting the invitation. If you would like this room protected, use <code>!mjolnir rooms add ${htmlEscape(roomId)}</code> `
+                    + `so I can accept the invite.`,
             });
+        };
+
+        if (config.autojoinOnlyIfManager) {
+            const managers = await client.getJoinedRoomMembers(config.managementRoom);
+            if (!managers.includes(membershipEvent.sender)) return reportInvite(); // ignore invite
         } else {
-            AutojoinRoomsMixin.setupOnClient(client);
+            const groupMembers = await client.unstableApis.getGroupUsers(config.acceptInvitesFromGroup);
+            const userIds = groupMembers.map(m => m.user_id);
+            if (!userIds.includes(membershipEvent.sender)) return reportInvite(); // ignore invite
         }
-    }
+
+        return client.joinRoom(roomId);
+    });
 
     const banLists: BanList[] = [];
     const protectedRooms: { [roomId: string]: string } = {};

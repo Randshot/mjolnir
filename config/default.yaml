@@ -21,14 +21,18 @@ pantalaimon:
 # The directory the bot should store various bits of information in
 dataPath: "/data/storage"
 
-# Whether the bot should autojoin rooms it is invited to or not
-autojoin: true
+# If true (the default), only users in the `managementRoom` can invite the bot
+# to new rooms.
+autojoinOnlyIfManager: true
 
-# If `autojoin` is true, this defines whether anyone can invite the bot (the
-# default), or only those in the `managementRoom` below. Generally this option
-# should be set to true (only allow people in the management room to do invites)
-# when using autojoin.
-autojoinOnlyIfManager: false
+# If `autojoinOnlyIfManager` is false, only the members in this group can invite
+# the bot to new rooms.
+acceptInvitesFromGroup: '+example:example.org'
+
+# If the bot is invited to a room and it won't accept the invite (due to the
+# conditions above), report it to the management room. Defaults to disabled (no
+# reporting).
+recordIgnoredInvites: false
 
 # The room ID where people can use the bot. The bot has no access controls, so
 # anyone in this room can use the bot - secure your room!

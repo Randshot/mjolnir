@@ -26,8 +26,9 @@ interface IConfig {
         password: string;
     };
     dataPath: string;
-    autojoin: boolean;
+    acceptInvitesFromGroup: string;
     autojoinOnlyIfManager: boolean;
+    recordIgnoredInvites: boolean;
     managementRoom: string;
     verboseLogging: boolean;
     logLevel: "DEBUG" | "INFO" | "WARN" | "ERROR";
@@ -67,8 +68,9 @@ const defaultConfig: IConfig = {
         password: "",
     },
     dataPath: "/data/storage",
-    autojoin: false,
+    acceptInvitesFromGroup: '+example:example.org',
     autojoinOnlyIfManager: false,
+    recordIgnoredInvites: false,
     managementRoom: "!noop:example.org",
     verboseLogging: false,
     logLevel: "INFO",
