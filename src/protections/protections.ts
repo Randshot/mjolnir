@@ -32,7 +32,7 @@ export const PROTECTIONS: PossibleProtections = {
     },
     [new ShortFlooding().name]: {
         description: "If a user posts more than " + SHORT_MAX_PER_INTERVAL + " messages in " + SHORT_INTERVAL * 0.001 + "s they'll be " +
-            "banned for spam. This does not publish the ban to any of your ban lists.",
+            "kicked for spam. This does not publish the kick to any of your ban lists.",
         factory: () => new ShortFlooding(),
     }
 };

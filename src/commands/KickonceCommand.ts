@@ -82,7 +82,7 @@ export async function execKickonceCommand(roomId: string, event: any, mjolnir: M
                 await logMessage(LogLevel.DEBUG, "KickonceCommand", `Kicking ${member.userId} in ${protectedRoomId}`);
 
                 if (!config.noop) {
-                    await mjolnir.client.kickUser(member.userId, protectedRoomId);
+                    await mjolnir.client.kickUser(member.userId, protectedRoomId, bits.reason);
                 } else {
                     await logMessage(LogLevel.WARN, "KickonceCommand", `Attempted to kick ${protectedRoomId} in ${protectedRoomId} but Mjolnir is running in no-op mode`);
                 }
