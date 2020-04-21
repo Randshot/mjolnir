@@ -87,7 +87,7 @@ export async function parseArguments(roomId: string, event: any, mjolnir: Mjolni
     };
 }
 
-// !mjolnir kick <shortcode> <glob> [reason]
+// !mjolnir addkick <shortcode> <glob> [reason]
 export async function execKickCommand(roomId: string, event: any, mjolnir: Mjolnir, parts: string[]) {
     const bits = await parseArguments(roomId, event, mjolnir, parts);
     if (!bits) return; // error already handled
@@ -104,7 +104,7 @@ export async function execKickCommand(roomId: string, event: any, mjolnir: Mjoln
     await mjolnir.client.unstableApis.addReactionToEvent(roomId, event['event_id'], '✅');
 }
 
-// !mjolnir unkick <shortcode> <glob>
+// !mjolnir removekick <shortcode> <glob>
 export async function execUnkickCommand(roomId: string, event: any, mjolnir: Mjolnir, parts: string[]) {
     const bits = await parseArguments(roomId, event, mjolnir, parts);
     if (!bits) return; // error already handled

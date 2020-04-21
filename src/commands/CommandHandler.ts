@@ -52,7 +52,7 @@ export async function handleCommand(roomId: string, event: any, mjolnir: Mjolnir
             return await execBanCommand(roomId, event, mjolnir, parts);
         } else if (parts[1] === 'unban' && parts.length > 2) {
             return await execUnbanCommand(roomId, event, mjolnir, parts);
-        } else if (parts[1] === 'kickonce' && parts.length > 2) {
+        } else if (parts[1] === 'kick' && parts.length > 2) {
             return await execKickonceCommand(roomId, event, mjolnir, parts);
         } else if (parts[1] === 'addkick' && parts.length > 2) {
             return await execKickCommand(roomId, event, mjolnir, parts);

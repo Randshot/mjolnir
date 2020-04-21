@@ -62,7 +62,7 @@ export async function parseArguments(roomId: string, event: any, mjolnir: Mjolni
     };
 }
 
-// !mjolnir kickonce <glob> [reason]
+// !mjolnir kick <glob> [reason]
 export async function execKickonceCommand(roomId: string, event: any, mjolnir: Mjolnir, parts: string[]) {
     const bits = await parseArguments(roomId, event, mjolnir, parts);
     if (!bits) return; // error already handled
