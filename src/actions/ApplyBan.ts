@@ -1,5 +1,5 @@
 /*
-Copyright 2019 The Matrix.org Foundation C.I.C.
+Copyright 2019, 2020 The Matrix.org Foundation C.I.C.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ export async function applyUserBans(lists: BanList[], roomIds: string[], mjolnir
     for (const roomId of roomIds) {
         try {
             // We specifically use sendNotice to avoid having to escape HTML
-            await logMessage(LogLevel.DEBUG, "ApplyBan", `Updating member bans in ${roomId}`);
+            await logMessage(LogLevel.DEBUG, "ApplyBan", `Updating member bans in ${roomId}`, roomId);
 
             let members: { userId: string, membership: string }[];
 
@@ -69,7 +69,7 @@ export async function applyUserBans(lists: BanList[], roomIds: string[], mjolnir
                                 // User needs to be banned
 
                                 // We specifically use sendNotice to avoid having to escape HTML
-                                await logMessage(LogLevel.INFO, "ApplyBan", `Banning ${member.userId} in ${roomId} for: ${userRule.reason}`);
+                                await logMessage(LogLevel.INFO, "ApplyBan", `Banning ${member.userId} in ${roomId} for: ${userRule.reason}`, roomId);
 
                                 if (!config.noop) {
                                     // Always prioritize redactions above bans

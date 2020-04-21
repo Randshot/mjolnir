@@ -1,5 +1,5 @@
 /*
-Copyright 2019 The Matrix.org Foundation C.I.C.
+Copyright 2019, 2020 The Matrix.org Foundation C.I.C.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-import { CreateEvent, LogLevel, LogService, MatrixClient, MatrixGlob, Permalinks } from "matrix-bot-sdk";
+import { CreateEvent, LogLevel, LogService, MatrixClient, MatrixGlob, Permalinks, UserID } from "matrix-bot-sdk";
 import BanList, { ALL_RULE_TYPES } from "./models/BanList";
 import { applyServerAcls } from "./actions/ApplyAcl";
 import { RoomUpdateError } from "./models/RoomUpdateError";
@@ -26,6 +26,7 @@ import ErrorCache, { ERROR_KIND_FATAL, ERROR_KIND_PERMISSION } from "./ErrorCach
 import { IProtection } from "./protections/IProtection";
 import { PROTECTIONS } from "./protections/protections";
 import { AutomaticRedactionQueue } from "./queues/AutomaticRedactionQueue";
+import { getRoomAlias } from "./utils";
 
 export const STATE_NOT_STARTED = "not_started";
 export const STATE_CHECKING_PERMISSIONS = "checking_permissions";
@@ -332,7 +333,7 @@ export class Mjolnir {
             // Ignore - probably haven't warned about it yet
         }
 
-        await logMessage(LogLevel.WARN, "Mjolnir", `Not protecting ${roomId} - it is a ban list that this bot did not create. Add the room as protected if it is supposed to be protected. This warning will not appear again.`);
+        await logMessage(LogLevel.WARN, "Mjolnir", `Not protecting ${roomId} - it is a ban list that this bot did not create. Add the room as protected if it is supposed to be protected. This warning will not appear again.`, roomId);
         await this.client.setAccountData(WARN_UNPROTECTED_ROOM_EVENT_PREFIX + roomId, {warned: true});
     }
 
@@ -559,8 +560,7 @@ export class Mjolnir {
             if (event['type'] === 'm.room.power_levels' && event['state_key'] === '') {
                 // power levels were updated - recheck permissions
                 ErrorCache.resetError(roomId, ERROR_KIND_PERMISSION);
-                const url = this.protectedRooms[roomId];
-                await logMessage(LogLevel.DEBUG, "Mjolnir", `Power levels changed in ${url} - checking permissions...`);
+                await logMessage(LogLevel.DEBUG, "Mjolnir", `Power levels changed in ${roomId} - checking permissions...`, roomId);
                 const errors = await this.verifyPermissionsIn(roomId);
                 const hadErrors = await this.printActionResult(errors);
                 if (!hadErrors) {
@@ -594,9 +594,11 @@ export class Mjolnir {
 
         html += `<font color="#ff0000"><b>${htmlTitle}${errors.length} errors updating protected rooms!</b></font><br /><ul>`;
         text += `${textTitle}${errors.length} errors updating protected rooms!\n`;
+        const viaServers = [(new UserID(await this.client.getUserId())).domain];
         for (const error of errors) {
-            const url = this.protectedRooms[error.roomId] ? this.protectedRooms[error.roomId] : `https://matrix.to/#/${error.roomId}`;
-            html += `<li><a href="${url}">${error.roomId}</a> - ${error.errorMessage}</li>`;
+            const alias = (await getRoomAlias(this.client, error.roomId)) || error.roomId;
+            const url = Permalinks.forRoom(alias, viaServers);
+            html += `<li><a href="${url}">${alias}</a> - ${error.errorMessage}</li>`;
             text += `${url} - ${error.errorMessage}\n`;
         }
         html += "</ul>";

@@ -54,9 +54,9 @@ export async function handleCommand(roomId: string, event: any, mjolnir: Mjolnir
             return await execUnbanCommand(roomId, event, mjolnir, parts);
         } else if (parts[1] === 'kickonce' && parts.length > 2) {
             return await execKickonceCommand(roomId, event, mjolnir, parts);
-        } else if (parts[1] === 'kick' && parts.length > 2) {
+        } else if (parts[1] === 'addkick' && parts.length > 2) {
             return await execKickCommand(roomId, event, mjolnir, parts);
-        } else if (parts[1] === 'unkick' && parts.length > 2) {
+        } else if (parts[1] === 'removekick' && parts.length > 2) {
             return await execUnkickCommand(roomId, event, mjolnir, parts);
         } else if (parts[1] === 'rules') {
             return await execDumpRulesCommand(roomId, event, mjolnir);
@@ -115,10 +115,10 @@ export async function handleCommand(roomId: string, event: any, mjolnir: Mjolnir
                 "!mjolnir status                                                     - Print status information\n" +
                 "!mjolnir ban <list shortcode> <user|room|server> <glob> [reason]    - Adds an entity to the ban list\n" +
                 "!mjolnir unban <list shortcode> <user|room|server> <glob> [apply]   - Removes an entity from the ban list. If apply is 'true', the users matching the glob will actually be unbanned\n" +
-                "!mjolnir kickonce <glob> [reason]                                   - Kicks users matching the given glob in all protected rooms without adding a rule to the ban/kick list\n" +
-                "!mjolnir kick <list shortcode> <glob> [reason]                      - Adds an entity to the ban list (with a recommended action of kicking)\n" +
-                "!mjolnir unkick <list shortcode> <glob>                             - Removes an entity from the ban list. Note that this can also be used to remove user ban rules\n" +
-                "!mjolnir redact <user ID> [room alias/ID]                           - Redacts messages by the sender in the target room (or all rooms)\n" +
+                "!mjolnir kick <glob> [reason]                                       - Kicks users matching the given glob in all protected rooms without adding a rule to the ban/kick list\n" +
+                "!mjolnir addkick <list shortcode> <glob> [reason]                   - Adds an entity to the ban list (with a recommended action of kicking)\n" +
+                "!mjolnir removekick <list shortcode> <glob>                         - Removes an entity from the ban list. Note that this can also be used to remove user ban rules\n" +
+                "!mjolnir redact <user ID> [room alias/ID] [limit]                   - Redacts messages by the sender in the target room (or all rooms)\n" +
                 "!mjolnir redact <event permalink>                                   - Redacts a message by permalink\n" +
                 "!mjolnir say <room alias/ID> <message>                              - Sends the provided message in the target room\n" +
                 "!mjolnir rules                                                      - Lists the rules currently in use by Mjolnir\n" +
