@@ -40,14 +40,19 @@ interface IConfig {
     ignoreLeftUsers: boolean;
     automaticallyRedactForReasons: string[]; // case-insensitive globs
     protectAllJoinedRooms: boolean;
-    banListServer: {
-        enabled: boolean;
-        bind: string;
-        port: number;
-    };
     commands: {
         allowNoPrefix: boolean;
         additionalPrefixes: string[];
+    };
+    health: {
+        healthz: {
+            enabled: boolean;
+            port: number;
+            address: string;
+            endpoint: string;
+            healthyStatus: number;
+            unhealthyStatus: number;
+        };
     };
 
     /**
@@ -82,14 +87,19 @@ const defaultConfig: IConfig = {
     ignoreLeftUsers: false,
     automaticallyRedactForReasons: ["spam", "advertising"],
     protectAllJoinedRooms: false,
-    banListServer: {
-        enabled: false,
-        bind: "0.0.0.0",
-        port: 5186,
-    },
     commands: {
         allowNoPrefix: false,
         additionalPrefixes: [],
+    },
+    health: {
+        healthz: {
+            enabled: false,
+            port: 8080,
+            address: "0.0.0.0",
+            endpoint: "/healthz",
+            healthyStatus: 200,
+            unhealthyStatus: 418,
+        },
     },
 
     // Needed to make the interface happy.
