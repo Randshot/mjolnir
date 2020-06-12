@@ -77,7 +77,7 @@ export class ShortFlooding implements IProtection {
             await logMessage(LogLevel.WARN, "ShortFlooding", `Kicking ${event['sender']} in ${roomId} for flooding (at least ${messageCount} messages in the last ${SHORT_INTERVAL * 0.001}s)`);
             if (!config.noop) {
                 //await mjolnir.client.banUser(event['sender'], roomId, "spam");
-                await mjolnir.client.kickUser(event['sender'], roomId, "spam");
+                await mjolnir.client.kickUser(event['sender'], roomId, "[automated] spam");
             } else {
                 await logMessage(LogLevel.WARN, "ShortFlooding", `Tried to kick ${event['sender']} in ${roomId} but Mjolnir is running in no-op mode`);
             }
