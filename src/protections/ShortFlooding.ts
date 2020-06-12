@@ -73,7 +73,7 @@ export class ShortFlooding implements IProtection {
             await logMessage(LogLevel.WARN, "ShortFlooding", `Kicking ${event['sender']} in ${roomId} for flooding (at least ${messageCount} messages in the last ${SHORT_INTERVAL * 0.001}s)`);
             if (!config.noop) {
                 //await mjolnir.client.banUser(event['sender'], roomId, "spam");
-                await mjolnir.client.kickUser(event['sender'], roomId, "[automated] spam");
+                await mjolnir.client.kickUser(event['sender'], roomId, "[automated] flooding protection");
             } else {
                 await logMessage(LogLevel.WARN, "ShortFlooding", `Tried to kick ${event['sender']} in ${roomId} but Mjolnir is running in no-op mode`);
             }
@@ -85,7 +85,7 @@ export class ShortFlooding implements IProtection {
             // Redact all the things the user said too
             if (!config.noop) {
                 for (const eventId of forUser.map(e => e.eventId)) {
-                    await mjolnir.client.redactEvent(roomId, eventId, "[automated] spam");
+                    await mjolnir.client.redactEvent(roomId, eventId, "[automated] flooding protection");
                 }
             } else {
                 await logMessage(LogLevel.WARN, "ShortFlooding", `Tried to redact messages for ${event['sender']} in ${roomId} but Mjolnir is running in no-op mode`);

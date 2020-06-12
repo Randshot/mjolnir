@@ -53,7 +53,7 @@ export class CustomFirstMessageIsImage implements IProtection {
             if (isMedia && this.justJoined[roomId].includes(event['sender'])) {
                 await logMessage(LogLevel.WARN, "CustomFirstMessageIsImage", `Kicking ${event['sender']} in ${roomId} for posting an image/video as the first thing after joining`);
                 if (!config.noop) {
-                    await mjolnir.client.kickUser(event['sender'], roomId, "[automated] spam");
+                    await mjolnir.client.kickUser(event['sender'], roomId, "[automated] first message is image/video protection");
                 } else {
                     await logMessage(LogLevel.WARN, "CustomFirstMessageIsImage", `Tried to kick ${event['sender']} in ${roomId} but Mjolnir is running in no-op mode`, roomId);
                 }
@@ -64,7 +64,7 @@ export class CustomFirstMessageIsImage implements IProtection {
 
                 // Redact the event
                 if (!config.noop) {
-                    await mjolnir.client.redactEvent(roomId, event['event_id'], "[automated] spam");
+                    await mjolnir.client.redactEvent(roomId, event['event_id'], "[automated] first message is image/media protection");
                 } else {
                     await logMessage(LogLevel.WARN, "CustomFirstMessageIsImage", `Tried to redact ${event['event_id']} in ${roomId} but Mjolnir is running in no-op mode`, roomId);
                 }
