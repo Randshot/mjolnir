@@ -14,12 +14,18 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+import { CustomFirstMessageIsImage } from "./CustomFirstMessageIsImage";
 import { FirstMessageIsImage } from "./FirstMessageIsImage";
 import { IProtection } from "./IProtection";
 import { BasicFlooding, MAX_PER_MINUTE } from "./BasicFlooding";
 import { ShortFlooding, SHORT_MAX_PER_INTERVAL, SHORT_INTERVAL } from "./ShortFlooding";
 
 export const PROTECTIONS: PossibleProtections = {
+    [new CustomFirstMessageIsImage().name]: {
+        description: "If the first thing a user does after joining is to post an image or video, " +
+            "they'll be kicked for spam. This does not publish the kick to any of your ban lists.",
+        factory: () => new CustomFirstMessageIsImage(),
+    },
     [new FirstMessageIsImage().name]: {
         description: "If the first thing a user does after joining is to post an image or video, " +
             "they'll be banned for spam. This does not publish the ban to any of your ban lists.",

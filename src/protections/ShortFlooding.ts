@@ -70,10 +70,6 @@ export class ShortFlooding implements IProtection {
         }
 
         if (messageCount >= SHORT_MAX_PER_INTERVAL) {
-            //if (this.recentlyBanned.includes(event['sender'])) return; // already handled (will be redacted)
-            //mjolnir.redactionHandler.addUser(event['sender']);
-            //this.recentlyBanned.push(event['sender']); // flag to reduce spam
-
             await logMessage(LogLevel.WARN, "ShortFlooding", `Kicking ${event['sender']} in ${roomId} for flooding (at least ${messageCount} messages in the last ${SHORT_INTERVAL * 0.001}s)`);
             if (!config.noop) {
                 //await mjolnir.client.banUser(event['sender'], roomId, "spam");
@@ -82,10 +78,14 @@ export class ShortFlooding implements IProtection {
                 await logMessage(LogLevel.WARN, "ShortFlooding", `Tried to kick ${event['sender']} in ${roomId} but Mjolnir is running in no-op mode`);
             }
 
+            //if (this.recentlyBanned.includes(event['sender'])) return; // already handled (will be redacted)
+            //mjolnir.redactionHandler.addUser(event['sender']);
+            //this.recentlyBanned.push(event['sender']); // flag to reduce spam
+
             // Redact all the things the user said too
             if (!config.noop) {
                 for (const eventId of forUser.map(e => e.eventId)) {
-                    await mjolnir.client.redactEvent(roomId, eventId, "spam");
+                    await mjolnir.client.redactEvent(roomId, eventId, "[automated] spam");
                 }
             } else {
                 await logMessage(LogLevel.WARN, "ShortFlooding", `Tried to redact messages for ${event['sender']} in ${roomId} but Mjolnir is running in no-op mode`);
