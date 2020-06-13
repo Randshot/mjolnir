@@ -54,7 +54,7 @@ export class CustomFirstMessageIsImage implements IProtection {
                 const file = content['file'] || {}
                 const fileUrl = file['url'] || 'NOT_FOUND'
                 const eventId = event['event_id'] || 'NOT_FOUND'
-                await logMessage(LogLevel.WARN, "CustomFirstMessageIsImage", `Kicking ${event['sender']} in ${roomId} for posting an image/video as the first thing after joining: https://matrix.to/#/${roomId}/${eventId}?via=nop.zone | ${fileUrl}`);
+                await logMessage(LogLevel.WARN, "CustomFirstMessageIsImage", `Kicking ${event['sender']} in ${roomId} for posting an image/video as the first thing after joining: https://matrix.to/#/${roomId}/${eventId}?via=nop.zone | ${fileUrl}`, [], true);
                 if (!config.noop) {
                     await mjolnir.client.kickUser(event['sender'], roomId, "[automated] first message is image/video protection");
                 } else {
