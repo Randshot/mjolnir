@@ -51,7 +51,10 @@ export class CustomFirstMessageIsImage implements IProtection {
             const formattedBody = content['formatted_body'] || '';
             const isMedia = msgtype === 'm.image' || msgtype === 'm.video' || formattedBody.toLowerCase().includes('<img');
             if (isMedia && this.justJoined[roomId].includes(event['sender'])) {
-                await logMessage(LogLevel.WARN, "CustomFirstMessageIsImage", `Kicking ${event['sender']} in ${roomId} for posting an image/video as the first thing after joining`);
+                const file = event['file'] || {}
+                const fileUrl = file['url'] || 'NOT_FOUND'
+                const eventId = event['event_id'] || 'NOT_FOUND'
+                await logMessage(LogLevel.WARN, "CustomFirstMessageIsImage", `Kicking ${event['sender']} in ${roomId} for posting an image/video as the first thing after joining: ${eventId} / ${fileUrl}`);
                 if (!config.noop) {
                     await mjolnir.client.kickUser(event['sender'], roomId, "[automated] first message is image/video protection");
                 } else {
