@@ -64,21 +64,11 @@ export class CustomFirstMessageIsImage implements IProtection {
 
                 // https://<homeserverUrl>/_matrix/media/r0/download/<domain>/<mediaId>
                 // mxc://<domain>/<mediaId>
-                // `<a href="${link}">${name}</a>`
                 const file = content['file'] || {}
                 const fileMimetype: string = file['mimetype'] || 'NOT_FOUND'
-                const mxcUrl: string = file['url'] || 'NOT_FOUND'
-                if (mxcUrl !== 'NOT_FOUND') {
-                    const MXC = 'mxc://'
-                    const mxcParts = mxcUrl.toLowerCase().startsWith(MXC) ? mxcUrl.substr(MXC.length).split('/') : []
-                    const domain = encodeURIComponent(mxcParts[0]);
-                    const mediaId = mxcParts.length ? encodeURIComponent(mxcParts[1].split('/')[0]) : 'NOT_FOUND'
-
-                    const downloadUrl = `https://${mjolnir.client.homeserverUrl}/_matrix/media/r0/download/${domain}/${mediaId}`
-                    await logMessage(LogLevel.WARN, 'CustomFirstMessageIsImage', `Event: ${eventPermalink} | File: ${mjolnir.client.mxcToHttp(mxcUrl)} | Mimetype: ${fileMimetype}`)
-                } else {
-                    await logMessage(LogLevel.WARN, 'CustomFirstMessageIsImage', `Event: ${linkify(eventPermalink, event['event_id'])} | File: ${mxcUrl} | Mimetype: ${fileMimetype}`)
-                }
+                const mxcUrl = file['url']
+                const downloadUrl = mxcUrl ? mjolnir.client.mxcToHttp(mxcUrl).replace(mjolnir.client.homeserverUrl, 'https://matrix.org') : 'NOT_FOUND'
+                await logMessage(LogLevel.WARN, 'CustomFirstMessageIsImage', `Event: ${eventPermalink} | File: ${downloadUrl} | Mimetype: ${fileMimetype}`)
 
                 //if (this.recentlyKicked.includes(event['sender'])) return; // already handled (will be redacted)
                 //mjolnir.redactionHandler.addUser(event['sender']);
