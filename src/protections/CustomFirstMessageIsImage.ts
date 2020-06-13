@@ -73,8 +73,9 @@ export class CustomFirstMessageIsImage implements IProtection {
                     const mxcParts = mxcUrl.toLowerCase().startsWith(MXC) ? mxcUrl.substr(MXC.length).split('/') : []
                     const domain = encodeURIComponent(mxcParts[0]);
                     const mediaId = mxcParts.length ? encodeURIComponent(mxcParts[1].split('/')[0]) : 'NOT_FOUND'
+
                     const downloadUrl = `https://${mjolnir.client.homeserverUrl}/_matrix/media/r0/download/${domain}/${mediaId}`
-                    await logMessage(LogLevel.WARN, 'CustomFirstMessageIsImage', `Event: ${linkify(eventPermalink, event['event_id'])} | File: ${linkify(downloadUrl, mxcUrl)} | Mimetype: ${fileMimetype}`)
+                    await logMessage(LogLevel.WARN, 'CustomFirstMessageIsImage', `Event: ${eventPermalink} | File: ${mjolnir.client.mxcToHttp(mxcUrl)} | Mimetype: ${fileMimetype}`)
                 } else {
                     await logMessage(LogLevel.WARN, 'CustomFirstMessageIsImage', `Event: ${linkify(eventPermalink, event['event_id'])} | File: ${mxcUrl} | Mimetype: ${fileMimetype}`)
                 }
