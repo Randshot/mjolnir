@@ -24,7 +24,7 @@ import { isTrueJoinEvent } from "../utils";
 export class CustomFirstMessageIsImage implements IProtection {
 
     private justJoined: { [roomId: string]: string[] } = {};
-    private recentlyKicked: string[] = [];
+    // private recentlyKicked: string[] = [];
 
     constructor() {
     }
@@ -51,19 +51,20 @@ export class CustomFirstMessageIsImage implements IProtection {
             const formattedBody = content['formatted_body'] || '';
             const isMedia = msgtype === 'm.image' || msgtype === 'm.video' || formattedBody.toLowerCase().includes('<img');
             if (isMedia && this.justJoined[roomId].includes(event['sender'])) {
-                await logMessage(LogLevel.WARN, 'CustomFirstMessageIsImage', `Kicking ${event['sender']} in ${roomId} for posting an image/video as the first thing after joining (see below)`);
+                await logMessage(LogLevel.WARN, 'CustomFirstMessageIsImage', `Kicking ${event['sender']} for posting an image/video as the first thing after joining in ${roomId} (see below)`, roomId);
+
+                if (!config.noop) {
+                    await mjolnir.client.kickUser(event['sender'], roomId, "[automated] first message is image/video protection");
+                } else {
+                    await logMessage(LogLevel.WARN, 'CustomFirstMessageIsImage', `Tried to kick ${event['sender']} in ${roomId} but Mjolnir is running in no-op mode`, roomId);
+                }
 
                 const file = content['file'] || {}
                 const fileUrl = file['url'] || 'NOT_FOUND'
                 const eventId = event['event_id']
                 const viaServers = [(new UserID(await mjolnir.client.getUserId())).domain];
                 const eventPermalink = eventId ? Permalinks.forEvent(roomId, eventId, viaServers) : 'NOT_FOUND'
-                await logMessage(LogLevel.INFO, 'CustomFirstMessageIsImage', `Event Permalink: ${eventPermalink} | MXC Url: ${fileUrl}`, [], true)
-                if (!config.noop) {
-                    await mjolnir.client.kickUser(event['sender'], roomId, "[automated] first message is image/video protection");
-                } else {
-                    await logMessage(LogLevel.WARN, 'CustomFirstMessageIsImage', `Tried to kick ${event['sender']} in ${roomId} but Mjolnir is running in no-op mode`, roomId);
-                }
+                await logMessage(LogLevel.WARN, 'CustomFirstMessageIsImage', `Event Permalink: ${eventPermalink} | MXC Url: ${fileUrl}`)
 
                 //if (this.recentlyKicked.includes(event['sender'])) return; // already handled (will be redacted)
                 //mjolnir.redactionHandler.addUser(event['sender']);
