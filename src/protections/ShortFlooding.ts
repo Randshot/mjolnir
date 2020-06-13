@@ -16,7 +16,7 @@ limitations under the License.
 
 import { IProtection } from "./IProtection";
 import { Mjolnir } from "../Mjolnir";
-import { LogLevel, LogService } from "matrix-bot-sdk";
+import { LogLevel, LogService, Permalinks, UserID } from "matrix-bot-sdk";
 import { logMessage } from "../LogProxy";
 import config from "../config";
 
@@ -56,7 +56,7 @@ export class ShortFlooding implements IProtection {
         let forUser = forRoom[event['sender']];
 
         if ((new Date()).getTime() - event['origin_server_ts'] > TIMESTAMP_THRESHOLD) {
-            LogService.warn("ShortFlooding", `${event['event_id']} is more than ${TIMESTAMP_THRESHOLD}ms out of phase - rewriting event time to be 'now'`);
+            LogService.warn('ShortFlooding', `${event['event_id']} is more than ${TIMESTAMP_THRESHOLD}ms out of phase - rewriting event time to be 'now'`);
             event['origin_server_ts'] = (new Date()).getTime();
         }
 
@@ -70,12 +70,14 @@ export class ShortFlooding implements IProtection {
         }
 
         if (messageCount >= SHORT_MAX_PER_INTERVAL) {
-            await logMessage(LogLevel.WARN, "ShortFlooding", `Kicking ${event['sender']} in ${roomId} for flooding (at least ${messageCount} messages in the last ${SHORT_INTERVAL * 0.001}s)`);
+            const viaServers = [(new UserID(await mjolnir.client.getUserId())).domain];
+            const eventPermalink = Permalinks.forEvent(roomId, event['event_id'], viaServers)
+            await logMessage(LogLevel.WARN, 'ShortFlooding', `Kicking ${event['sender']} for flooding (at least ${messageCount} messages in the last ${SHORT_INTERVAL * 0.001}s) in ${roomId}: ${eventPermalink}`, roomId);
             if (!config.noop) {
                 //await mjolnir.client.banUser(event['sender'], roomId, "spam");
                 await mjolnir.client.kickUser(event['sender'], roomId, "[automated] flooding protection");
             } else {
-                await logMessage(LogLevel.WARN, "ShortFlooding", `Tried to kick ${event['sender']} in ${roomId} but Mjolnir is running in no-op mode`);
+                await logMessage(LogLevel.WARN, 'ShortFlooding', `Tried to kick ${event['sender']} in ${roomId} but Mjolnir is running in no-op mode`, roomId);
             }
 
             //if (this.recentlyBanned.includes(event['sender'])) return; // already handled (will be redacted)
@@ -88,7 +90,7 @@ export class ShortFlooding implements IProtection {
                     await mjolnir.client.redactEvent(roomId, eventId, "[automated] flooding protection");
                 }
             } else {
-                await logMessage(LogLevel.WARN, "ShortFlooding", `Tried to redact messages for ${event['sender']} in ${roomId} but Mjolnir is running in no-op mode`);
+                await logMessage(LogLevel.WARN, 'ShortFlooding', `Tried to redact messages for ${event['sender']} in ${roomId} but Mjolnir is running in no-op mode`, roomId);
             }
 
             // Free up some memory now that we're ready to handle it elsewhere
