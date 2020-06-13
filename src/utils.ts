@@ -203,3 +203,7 @@ export async function replaceRoomIdsWithPills(client: MatrixClient, text: string
 
     return content;
 }
+
+export function linkify(link: string, name: string): string {
+    return `<a href="${link}">${name}</a>`
+}

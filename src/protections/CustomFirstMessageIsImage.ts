@@ -19,7 +19,7 @@ import { Mjolnir } from "../Mjolnir";
 import { LogLevel, LogService, Permalinks, UserID } from "matrix-bot-sdk";
 import { logMessage } from "../LogProxy";
 import config from "../config";
-import { isTrueJoinEvent } from "../utils";
+import { isTrueJoinEvent, linkify } from "../utils";
 
 export class CustomFirstMessageIsImage implements IProtection {
 
@@ -59,12 +59,25 @@ export class CustomFirstMessageIsImage implements IProtection {
                     await logMessage(LogLevel.WARN, 'CustomFirstMessageIsImage', `Tried to kick ${event['sender']} in ${roomId} but Mjolnir is running in no-op mode`, roomId);
                 }
 
-                const file = content['file'] || {}
-                const fileUrl = file['url'] || 'NOT_FOUND'
-                const eventId = event['event_id']
                 const viaServers = [(new UserID(await mjolnir.client.getUserId())).domain];
-                const eventPermalink = eventId ? Permalinks.forEvent(roomId, eventId, viaServers) : 'NOT_FOUND'
-                await logMessage(LogLevel.WARN, 'CustomFirstMessageIsImage', `Event Permalink: ${eventPermalink} | MXC Url: ${fileUrl}`)
+                const eventPermalink = Permalinks.forEvent(roomId, event['event_id'], viaServers)
+
+                // https://<homeserverUrl>/_matrix/media/r0/download/<domain>/<mediaId>
+                // mxc://<domain>/<mediaId>
+                // `<a href="${link}">${name}</a>`
+                const file = content['file'] || {}
+                const fileMimetype: string = file['mimetype'] || 'NOT_FOUND'
+                const mxcUrl: string = file['url'] || 'NOT_FOUND'
+                if (mxcUrl !== 'NOT_FOUND') {
+                    const MXC = 'mxc://'
+                    const mxcParts = mxcUrl.toLowerCase().startsWith(MXC) ? mxcUrl.substr(MXC.length).split('/') : []
+                    const domain = encodeURIComponent(mxcParts[0]);
+                    const mediaId = mxcParts.length ? encodeURIComponent(mxcParts[1].split('/')[0]) : 'NOT_FOUND'
+                    const downloadUrl = `https://${mjolnir.client.homeserverUrl}/_matrix/media/r0/download/${domain}/${mediaId}`
+                    await logMessage(LogLevel.WARN, 'CustomFirstMessageIsImage', `Event: ${linkify(eventPermalink, event['event_id'])} | File: ${linkify(downloadUrl, mxcUrl)} | Mimetype: ${fileMimetype}`)
+                } else {
+                    await logMessage(LogLevel.WARN, 'CustomFirstMessageIsImage', `Event: ${linkify(eventPermalink, event['event_id'])} | File: ${mxcUrl} | Mimetype: ${fileMimetype}`)
+                }
 
                 //if (this.recentlyKicked.includes(event['sender'])) return; // already handled (will be redacted)
                 //mjolnir.redactionHandler.addUser(event['sender']);
