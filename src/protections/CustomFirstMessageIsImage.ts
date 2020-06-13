@@ -53,22 +53,19 @@ export class CustomFirstMessageIsImage implements IProtection {
             if (isMedia && this.justJoined[roomId].includes(event['sender'])) {
                 await logMessage(LogLevel.WARN, 'CustomFirstMessageIsImage', `Kicking ${event['sender']} for posting an image/video as the first thing after joining in ${roomId} (see below)`, roomId);
 
-                if (!config.noop) {
-                    await mjolnir.client.kickUser(event['sender'], roomId, "[automated] first message is image/video protection");
-                } else {
-                    await logMessage(LogLevel.WARN, 'CustomFirstMessageIsImage', `Tried to kick ${event['sender']} in ${roomId} but Mjolnir is running in no-op mode`, roomId);
-                }
-
                 const viaServers = [(new UserID(await mjolnir.client.getUserId())).domain];
                 const eventPermalink = Permalinks.forEvent(roomId, event['event_id'], viaServers)
-
-                // https://<homeserverUrl>/_matrix/media/r0/download/<domain>/<mediaId>
-                // mxc://<domain>/<mediaId>
                 const file = content['file'] || {}
                 const fileMimetype: string = file['mimetype'] || 'NOT_FOUND'
                 const mxcUrl = file['url']
                 const downloadUrl = mxcUrl ? mjolnir.client.mxcToHttp(mxcUrl).replace(mjolnir.client.homeserverUrl, 'https://matrix.org') : 'NOT_FOUND'
                 await logMessage(LogLevel.WARN, 'CustomFirstMessageIsImage', `Event: ${eventPermalink} | File: ${downloadUrl} | Mimetype: ${fileMimetype}`)
+
+                if (!config.noop) {
+                    await mjolnir.client.kickUser(event['sender'], roomId, "[automated] first message is image/video protection");
+                } else {
+                    await logMessage(LogLevel.WARN, 'CustomFirstMessageIsImage', `Tried to kick ${event['sender']} in ${roomId} but Mjolnir is running in no-op mode`, roomId);
+                }
 
                 //if (this.recentlyKicked.includes(event['sender'])) return; // already handled (will be redacted)
                 //mjolnir.redactionHandler.addUser(event['sender']);
