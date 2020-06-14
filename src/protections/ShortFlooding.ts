@@ -70,9 +70,11 @@ export class ShortFlooding implements IProtection {
         }
 
         if (messageCount >= SHORT_MAX_PER_INTERVAL) {
+            await logMessage(LogLevel.WARN, 'ShortFlooding', `Kicking ${event['sender']} for flooding (at least ${messageCount} messages in the last ${SHORT_INTERVAL * 0.001}s) in ${roomId}`, roomId);
             const viaServers = [(new UserID(await mjolnir.client.getUserId())).domain];
             const eventPermalink = Permalinks.forEvent(roomId, event['event_id'], viaServers)
-            await logMessage(LogLevel.WARN, 'ShortFlooding', `Kicking ${event['sender']} for flooding (at least ${messageCount} messages in the last ${SHORT_INTERVAL * 0.001}s) in ${roomId}: ${eventPermalink}`, roomId);
+            await logMessage(LogLevel.WARN, 'ShortFlooding', `Event: ${eventPermalink}`)
+
             if (!config.noop) {
                 //await mjolnir.client.banUser(event['sender'], roomId, "spam");
                 await mjolnir.client.kickUser(event['sender'], roomId, "[automated] flooding protection");
